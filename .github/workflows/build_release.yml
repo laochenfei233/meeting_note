@@ -1,4 +1,4 @@
-name: Build and Release
+name: Build Release Packages
 
 on:
   push:
@@ -8,7 +8,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  build-web:
+  build-web-release:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -31,16 +31,7 @@ jobs:
           name: web-release
           path: build/web/
 
-      - name: Build Web Debug
-        run: flutter build web --debug
-
-      - name: Archive Web Debug
-        uses: actions/upload-artifact@v4
-        with:
-          name: web-debug
-          path: build/web/
-
-  build-linux:
+  build-linux-release:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -71,16 +62,7 @@ jobs:
           name: linux-release
           path: build/linux/x64/release/bundle/
 
-      - name: Build Linux Debug
-        run: flutter build linux --debug
-
-      - name: Archive Linux Debug
-        uses: actions/upload-artifact@v4
-        with:
-          name: linux-debug
-          path: build/linux/x64/debug/bundle/
-
-  build-windows:
+  build-windows-release:
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4
@@ -106,16 +88,7 @@ jobs:
           name: windows-release
           path: build/windows/x64/runner/Release/
 
-      - name: Build Windows Debug
-        run: flutter build windows --debug
-
-      - name: Archive Windows Debug
-        uses: actions/upload-artifact@v4
-        with:
-          name: windows-debug
-          path: build/windows/x64/runner/Debug/
-
-  build-macos:
+  build-macos-release:
     runs-on: macos-latest
     steps:
       - uses: actions/checkout@v4
@@ -141,16 +114,7 @@ jobs:
           name: macos-release
           path: build/macos/Build/Products/Release/
 
-      - name: Build macOS Debug
-        run: flutter build macos --debug
-
-      - name: Archive macOS Debug
-        uses: actions/upload-artifact@v4
-        with:
-          name: macos-debug
-          path: build/macos/Build/Products/Debug/
-
-  build-android:
+  build-android-release:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -173,16 +137,7 @@ jobs:
           name: android-release
           path: build/app/outputs/flutter-apk/app-release.apk
 
-      - name: Build Android Debug
-        run: flutter build apk --debug
-
-      - name: Archive Android Debug
-        uses: actions/upload-artifact@v4
-        with:
-          name: android-debug
-          path: build/app/outputs/flutter-apk/app-debug.apk
-
-  build-ios:
+  build-ios-release:
     runs-on: macos-latest
     steps:
       - uses: actions/checkout@v4
@@ -205,17 +160,8 @@ jobs:
           name: ios-release
           path: build/ios/iphoneos/Runner.app
 
-      - name: Build iOS Debug
-        run: flutter build ios --debug --no-codesign
-
-      - name: Archive iOS Debug
-        uses: actions/upload-artifact@v4
-        with:
-          name: ios-debug
-          path: build/ios/iphonesimulator/Runner.app
-
   create-release:
-    needs: [build-web, build-linux, build-windows, build-macos, build-android, build-ios]
+    needs: [build-web-release, build-linux-release, build-windows-release, build-macos-release, build-android-release, build-ios-release]
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main'
     steps:
@@ -228,17 +174,11 @@ jobs:
       - name: Package artifacts
         run: |
           zip -r web-release.zip web-release
-          zip -r web-debug.zip web-debug
           zip -r linux-release.zip linux-release
-          zip -r linux-debug.zip linux-debug
           zip -r windows-release.zip windows-release
-          zip -r windows-debug.zip windows-debug
           zip -r macos-release.zip macos-release
-          zip -r macos-debug.zip macos-debug
           zip -r android-release.zip android-release
-          zip -r android-debug.zip android-debug
           zip -r ios-release.zip ios-release
-          zip -r ios-debug.zip ios-debug
 
       - name: Create Release
         id: create_release
@@ -261,16 +201,6 @@ jobs:
           asset_name: meeting-note-web-release.zip
           asset_content_type: application/zip
 
-      - name: Upload Web Debug
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./web-debug.zip
-          asset_name: meeting-note-web-debug.zip
-          asset_content_type: application/zip
-
       - name: Upload Linux Release
         uses: actions/upload-release-asset@v1
         env:
@@ -279,16 +209,6 @@ jobs:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
           asset_path: ./linux-release.zip
           asset_name: meeting-note-linux-release.zip
-          asset_content_type: application/zip
-
-      - name: Upload Linux Debug
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./linux-debug.zip
-          asset_name: meeting-note-linux-debug.zip
           asset_content_type: application/zip
 
       - name: Upload Windows Release
@@ -301,16 +221,6 @@ jobs:
           asset_name: meeting-note-windows-release.zip
           asset_content_type: application/zip
 
-      - name: Upload Windows Debug
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./windows-debug.zip
-          asset_name: meeting-note-windows-debug.zip
-          asset_content_type: application/zip
-
       - name: Upload macOS Release
         uses: actions/upload-release-asset@v1
         env:
@@ -319,16 +229,6 @@ jobs:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
           asset_path: ./macos-release.zip
           asset_name: meeting-note-macos-release.zip
-          asset_content_type: application/zip
-
-      - name: Upload macOS Debug
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./macos-debug.zip
-          asset_name: meeting-note-macos-debug.zip
           asset_content_type: application/zip
 
       - name: Upload Android Release
@@ -341,16 +241,6 @@ jobs:
           asset_name: meeting-note-android-release.zip
           asset_content_type: application/zip
 
-      - name: Upload Android Debug
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./android-debug.zip
-          asset_name: meeting-note-android-debug.zip
-          asset_content_type: application/zip
-
       - name: Upload iOS Release
         uses: actions/upload-release-asset@v1
         env:
@@ -359,14 +249,4 @@ jobs:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
           asset_path: ./ios-release.zip
           asset_name: meeting-note-ios-release.zip
-          asset_content_type: application/zip
-
-      - name: Upload iOS Debug
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./ios-debug.zip
-          asset_name: meeting-note-ios-debug.zip
           asset_content_type: application/zip
