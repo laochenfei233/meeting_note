@@ -1,0 +1,372 @@
+name: Build and Release
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  build-web:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.10.0'
+          channel: 'stable'
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Build Web Release
+        run: flutter build web --release --no-tree-shake-icons --dart-define=FLUTTER_WEB_USE_SKIA=false --no-source-maps --dart2js-optimization O4
+
+      - name: Archive Web Release
+        uses: actions/upload-artifact@v3
+        with:
+          name: web-release
+          path: build/web/
+
+      - name: Build Web Debug
+        run: flutter build web --debug
+
+      - name: Archive Web Debug
+        uses: actions/upload-artifact@v3
+        with:
+          name: web-debug
+          path: build/web/
+
+  build-linux:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.10.0'
+          channel: 'stable'
+
+      - name: Install Linux dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y clang cmake ninja-build pkg-config libgtk-3-dev liblzma-dev
+
+      - name: Enable Linux desktop
+        run: flutter config --enable-linux-desktop
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Build Linux Release
+        run: flutter build linux --release
+
+      - name: Archive Linux Release
+        uses: actions/upload-artifact@v3
+        with:
+          name: linux-release
+          path: build/linux/x64/release/bundle/
+
+      - name: Build Linux Debug
+        run: flutter build linux --debug
+
+      - name: Archive Linux Debug
+        uses: actions/upload-artifact@v3
+        with:
+          name: linux-debug
+          path: build/linux/x64/debug/bundle/
+
+  build-windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.10.0'
+          channel: 'stable'
+
+      - name: Enable Windows desktop
+        run: flutter config --enable-windows-desktop
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Build Windows Release
+        run: flutter build windows --release
+
+      - name: Archive Windows Release
+        uses: actions/upload-artifact@v3
+        with:
+          name: windows-release
+          path: build/windows/x64/runner/Release/
+
+      - name: Build Windows Debug
+        run: flutter build windows --debug
+
+      - name: Archive Windows Debug
+        uses: actions/upload-artifact@v3
+        with:
+          name: windows-debug
+          path: build/windows/x64/runner/Debug/
+
+  build-macos:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.10.0'
+          channel: 'stable'
+
+      - name: Enable macOS desktop
+        run: flutter config --enable-macos-desktop
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Build macOS Release
+        run: flutter build macos --release
+
+      - name: Archive macOS Release
+        uses: actions/upload-artifact@v3
+        with:
+          name: macos-release
+          path: build/macos/Build/Products/Release/
+
+      - name: Build macOS Debug
+        run: flutter build macos --debug
+
+      - name: Archive macOS Debug
+        uses: actions/upload-artifact@v3
+        with:
+          name: macos-debug
+          path: build/macos/Build/Products/Debug/
+
+  build-android:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.10.0'
+          channel: 'stable'
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Build Android Release
+        run: flutter build apk --release
+
+      - name: Archive Android Release
+        uses: actions/upload-artifact@v3
+        with:
+          name: android-release
+          path: build/app/outputs/flutter-apk/app-release.apk
+
+      - name: Build Android Debug
+        run: flutter build apk --debug
+
+      - name: Archive Android Debug
+        uses: actions/upload-artifact@v3
+        with:
+          name: android-debug
+          path: build/app/outputs/flutter-apk/app-debug.apk
+
+  build-ios:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.10.0'
+          channel: 'stable'
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Build iOS Release
+        run: flutter build ios --release --no-codesign
+
+      - name: Archive iOS Release
+        uses: actions/upload-artifact@v3
+        with:
+          name: ios-release
+          path: build/ios/iphoneos/Runner.app
+
+      - name: Build iOS Debug
+        run: flutter build ios --debug --no-codesign
+
+      - name: Archive iOS Debug
+        uses: actions/upload-artifact@v3
+        with:
+          name: ios-debug
+          path: build/ios/iphonesimulator/Runner.app
+
+  create-release:
+    needs: [build-web, build-linux, build-windows, build-macos, build-android, build-ios]
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Download all artifacts
+        uses: actions/download-artifact@v3
+
+      - name: Package artifacts
+        run: |
+          zip -r web-release.zip web-release
+          zip -r web-debug.zip web-debug
+          zip -r linux-release.zip linux-release
+          zip -r linux-debug.zip linux-debug
+          zip -r windows-release.zip windows-release
+          zip -r windows-debug.zip windows-debug
+          zip -r macos-release.zip macos-release
+          zip -r macos-debug.zip macos-debug
+          zip -r android-release.zip android-release
+          zip -r android-debug.zip android-debug
+          zip -r ios-release.zip ios-release
+          zip -r ios-debug.zip ios-debug
+
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: v${{ github.run_number }}
+          release_name: Release v${{ github.run_number }}
+          draft: false
+          prerelease: false
+
+      - name: Upload Web Release
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./web-release.zip
+          asset_name: meeting-note-web-release.zip
+          asset_content_type: application/zip
+
+      - name: Upload Web Debug
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./web-debug.zip
+          asset_name: meeting-note-web-debug.zip
+          asset_content_type: application/zip
+
+      - name: Upload Linux Release
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./linux-release.zip
+          asset_name: meeting-note-linux-release.zip
+          asset_content_type: application/zip
+
+      - name: Upload Linux Debug
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./linux-debug.zip
+          asset_name: meeting-note-linux-debug.zip
+          asset_content_type: application/zip
+
+      - name: Upload Windows Release
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./windows-release.zip
+          asset_name: meeting-note-windows-release.zip
+          asset_content_type: application/zip
+
+      - name: Upload Windows Debug
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./windows-debug.zip
+          asset_name: meeting-note-windows-debug.zip
+          asset_content_type: application/zip
+
+      - name: Upload macOS Release
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./macos-release.zip
+          asset_name: meeting-note-macos-release.zip
+          asset_content_type: application/zip
+
+      - name: Upload macOS Debug
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./macos-debug.zip
+          asset_name: meeting-note-macos-debug.zip
+          asset_content_type: application/zip
+
+      - name: Upload Android Release
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./android-release.zip
+          asset_name: meeting-note-android-release.zip
+          asset_content_type: application/zip
+
+      - name: Upload Android Debug
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./android-debug.zip
+          asset_name: meeting-note-android-debug.zip
+          asset_content_type: application/zip
+
+      - name: Upload iOS Release
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./ios-release.zip
+          asset_name: meeting-note-ios-release.zip
+          asset_content_type: application/zip
+
+      - name: Upload iOS Debug
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./ios-debug.zip
+          asset_name: meeting-note-ios-debug.zip
+          asset_content_type: application/zip

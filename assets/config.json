@@ -1,0 +1,30 @@
+{
+  "asr_models": [
+    {
+      "name": "Aliyun",
+      "url": "https://dashscope.aliyuncs.com/api-v1/services/audio/asr/transcription",
+      "key": "",
+      "model_name": "fun-asr-realtime"
+    }
+  ],
+  "summary_models": [
+    {
+      "name": "Aliyun-Qwen-Plus",
+      "url": "https://dashscope.aliyuncs.com/api-v1/services/aigc/text-generation/generation",
+      "key": "",
+      "model_name": "qwen-plus"
+    },
+    {
+      "name": "Aliyun-Qwen-Max",
+      "url": "https://dashscope.aliyuncs.com/api-v1/services/aigc/text-generation/generation",
+      "key": "",
+      "model_name": "qwen-max"
+    },
+    {
+      "name": "Aliyun-Qwen-Turbo",
+      "url": "https://dashscope.aliyuncs.com/api-v1/services/aigc/text-generation/generation",
+      "key": "",
+      "model_name": "qwen-turbo"
+    }
+  ]
+}
