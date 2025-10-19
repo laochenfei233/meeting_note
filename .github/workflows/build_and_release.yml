@@ -11,7 +11,7 @@ jobs:
   build-web:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
@@ -26,7 +26,7 @@ jobs:
         run: flutter build web --release --no-tree-shake-icons --dart-define=FLUTTER_WEB_USE_SKIA=false --no-source-maps --dart2js-optimization O4
 
       - name: Archive Web Release
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: web-release
           path: build/web/
@@ -35,7 +35,7 @@ jobs:
         run: flutter build web --debug
 
       - name: Archive Web Debug
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: web-debug
           path: build/web/
@@ -43,7 +43,7 @@ jobs:
   build-linux:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
@@ -66,7 +66,7 @@ jobs:
         run: flutter build linux --release
 
       - name: Archive Linux Release
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: linux-release
           path: build/linux/x64/release/bundle/
@@ -75,7 +75,7 @@ jobs:
         run: flutter build linux --debug
 
       - name: Archive Linux Debug
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: linux-debug
           path: build/linux/x64/debug/bundle/
@@ -83,7 +83,7 @@ jobs:
   build-windows:
     runs-on: windows-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
@@ -101,7 +101,7 @@ jobs:
         run: flutter build windows --release
 
       - name: Archive Windows Release
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: windows-release
           path: build/windows/x64/runner/Release/
@@ -110,7 +110,7 @@ jobs:
         run: flutter build windows --debug
 
       - name: Archive Windows Debug
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: windows-debug
           path: build/windows/x64/runner/Debug/
@@ -118,7 +118,7 @@ jobs:
   build-macos:
     runs-on: macos-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
@@ -136,7 +136,7 @@ jobs:
         run: flutter build macos --release
 
       - name: Archive macOS Release
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: macos-release
           path: build/macos/Build/Products/Release/
@@ -145,7 +145,7 @@ jobs:
         run: flutter build macos --debug
 
       - name: Archive macOS Debug
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: macos-debug
           path: build/macos/Build/Products/Debug/
@@ -153,7 +153,7 @@ jobs:
   build-android:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
@@ -168,7 +168,7 @@ jobs:
         run: flutter build apk --release
 
       - name: Archive Android Release
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: android-release
           path: build/app/outputs/flutter-apk/app-release.apk
@@ -177,7 +177,7 @@ jobs:
         run: flutter build apk --debug
 
       - name: Archive Android Debug
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: android-debug
           path: build/app/outputs/flutter-apk/app-debug.apk
@@ -185,7 +185,7 @@ jobs:
   build-ios:
     runs-on: macos-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
@@ -200,7 +200,7 @@ jobs:
         run: flutter build ios --release --no-codesign
 
       - name: Archive iOS Release
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: ios-release
           path: build/ios/iphoneos/Runner.app
@@ -209,7 +209,7 @@ jobs:
         run: flutter build ios --debug --no-codesign
 
       - name: Archive iOS Debug
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: ios-debug
           path: build/ios/iphonesimulator/Runner.app
@@ -220,10 +220,10 @@ jobs:
     if: github.ref == 'refs/heads/main'
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Download all artifacts
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
 
       - name: Package artifacts
         run: |
