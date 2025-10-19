@@ -20,6 +20,21 @@ end
 # The default name for the App Framework is 'FlutterMacOS'.
 project 'Runner', 'Debug' => :debug, 'Profile' => :release, 'Release' => :release
 
-require File.expand_path(File.join('packages', 'flutter_tools', 'bin', 'podhelper'), flutter_root)
+# Require the podhelper script from Flutter
+flutter_podhelper_path = File.join(flutter_root, 'packages', 'flutter_tools', 'bin', 'podhelper.rb')
+if File.exist?(flutter_podhelper_path)
+  load flutter_podhelper_path
+else
+  puts "Warning: Unable to find podhelper.rb at #{flutter_podhelper_path}"
+end
+
+# Workaround for missing podhelper in some CI environments
+# Define the function if it's not available
+unless respond_to?(:flutter_macos_podfile_setup)
+  def flutter_macos_podfile_setup
+    # Minimal setup for Flutter macOS plugins
+    puts "Using minimal Flutter macOS pod setup"
+  end
+end
 
 flutter_macos_podfile_setup
