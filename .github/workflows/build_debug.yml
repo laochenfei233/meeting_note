@@ -131,8 +131,23 @@ jobs:
       - name: Install dependencies
         run: flutter pub get
 
+      - name: Set up JDK 11
+        uses: actions/setup-java@v3
+        with:
+          java-version: '11'
+          distribution: 'temurin'
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Clean previous builds
+        run: flutter clean
+
       - name: Build Android Debug
-        run: flutter build apk --debug
+        run: |
+          export PUB_HOSTED_URL=https://pub.flutter-io.cn
+          export FLUTTER_STORAGE_BASE_URL=https://storage.flutter-io.cn
+          flutter build apk --debug
 
       - name: Archive Android Debug
         uses: actions/upload-artifact@v4
