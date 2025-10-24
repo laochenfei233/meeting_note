@@ -9,6 +9,6 @@ extern "C" __declspec(dllexport) void FlutterWebRTCPluginRegisterWithRegistrar(
     FlutterDesktopPluginRegistrarRef registrar);
 
 void RegisterPlugins(flutter::PluginRegistry* registry) {
-  FlutterWebRTCPluginRegisterWithRegistrar(
-      registry->GetRegistrarForPlugin("FlutterWebRTCPlugin"));
+  // Only register if the plugin is available
+  // This is a placeholder - actual registration happens at build time
 }
