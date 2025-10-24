@@ -7,10 +7,10 @@ import 'package:meeting_note/utils/theme_utils.dart';
 import 'package:flutter_webrtc/flutter_webrtc.dart';
 
 void main() {
-  // Initialize WebRTC for desktop platforms (not on web)
-  if (!kIsWeb) {
-    WidgetsFlutterBinding.ensureInitialized();
-  }
+  // Initialize WebRTC for all platforms
+  WidgetsFlutterBinding.ensureInitialized();
+  // Initialize WebRTC
+  WebRTC.initialize();
   
   runApp(
     ChangeNotifierProvider(
